@@ -84,7 +84,7 @@ set "WITSML_URL=http://127.0.0.1:%MOCK_PORT%/witsml/store"
 set "DATABASE_URL=sqlite+aiosqlite:///./witsml_native.db"
 set "REDIS_URL="
 set "POLL_INTERVAL_SECONDS=5"
-set "VITE_API_BASE_URL=http://localhost:%API_PORT%"
+set "VITE_API_BASE_URL=http://localhost:%API_PORT%/api"
 set "VITE_WS_BASE_URL=ws://localhost:%API_PORT%"
 REM backend on PYTHONPATH for app.*, repo root for the mockstore/simulator packages.
 set "PYTHONPATH=backend;."

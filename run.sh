@@ -89,7 +89,7 @@ run_native() {
   export DATABASE_URL="sqlite+aiosqlite:///./witsml_native.db"
   export REDIS_URL=""                      # empty -> in-process cache fallback
   export POLL_INTERVAL_SECONDS="${POLL_INTERVAL_SECONDS:-5}"
-  export VITE_API_BASE_URL="http://localhost:${api_port}"
+  export VITE_API_BASE_URL="http://localhost:${api_port}/api"
   export VITE_WS_BASE_URL="ws://localhost:${api_port}"
 
   local pids=()
