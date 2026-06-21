@@ -154,21 +154,28 @@ explicitly so the rest of the app never has to think about them:
 
 ---
 
-## Build status
+## Build status — all phases complete ✅
 
-- **Phase 0 — Scaffold / bootable.** ✅ Done. Full compose stack, config, domain models, security
-  primitives, health probe, CI tooling — `docker compose up` boots end-to-end.
-- **Phase 1 — WITSML client + discovery (READ).** ✅ Done. SOAP `WitsmlClient`, QBE query builders,
-  lxml parsers, polling helpers, and read-only discovery endpoints (wells / wellbores / log headers / data).
+- **Phase 0 — Scaffold / bootable.** Compose stack (postgres, redis, mockstore, api, simulator, web),
+  config, domain models, security primitives, health probe, Alembic.
+- **Phase 1 — WITSML client + discovery (READ).** Async SOAP `WitsmlClient` (the `+2` truncation loop),
+  QBE builders, lxml parsers, polling/boundary-dedupe, discovery endpoints (wells/wellbores/logs/cap/tree).
+- **Phase 2 — Ingestion engine + WebSocket.** 5 s coordinated scheduler (staggered, bounded concurrency,
+  "ingest 20 / view 1"), in-memory ring buffer + Postgres history, resumable index snapshot, `/ws` hub.
+- **Phase 3 — Configurable dashboard.** Dynamic pages (draggable grid) with Numeric / Chart / Strip
+  components, parameter catalog, and the safe formula-based unit engine.
+- **Phase 4 — Write path.** `AddToStore` / `UpdateInStore` (`/store`) with a write-then-read equality test.
+- **Phase 5 — Comparison + lithology.** Up to 4 wells on a shared depth axis (log/Cartesian) with
+  geology/lithology tracks + table, from live `mudLog` data.
+- **Phase 6 — Formulas + export.** 8 drilling-hydraulics formulas (constant or live-bound inputs, incl.
+  the legacy Impact Force) + Excel (openpyxl) and PDF (reportlab) export.
+- **Phase 7 — Reporting + RBAC.** JWT auth, users + per-page grants (normal/admin/super-admin), encrypted
+  server connections; Remarks & Summary + Mud Properties reporting (saved searches, depth-of-interest),
+  with the remaining report modules scaffolded.
 
-**Planned (2–7):**
-
-- **Phase 2 — Live ingestion & WebSocket.** 5 s poll scheduler, ring buffer, normalize pipeline, WS hub.
-- **Phase 3 — Persistence & history.** Postgres history store, backfill, time/depth range queries.
-- **Phase 4 — Mudlog & geology.** Lithology / geology intervals, gas, lag-depth handling, mudlog views.
-- **Phase 5 — Auth & multi-tenant connections.** User/role auth, per-connection encrypted credentials.
-- **Phase 6 — Write-back (Add/Update/Delete).** Data management against the Store with conformance guards.
-- **Phase 7 — Export & reporting.** Excel (openpyxl) and PDF (reportlab) exports, scheduled reports.
+**Verification:** 124-test unit suite (`cd backend && pytest`) plus live end-to-end scripts under
+[`scripts/`](scripts/README.md) — `feature_test.py` drove **27/27 features green** against the running
+stack (mock store ← simulator → API ingestion scheduler → REST/WS).
 
 ---
 
