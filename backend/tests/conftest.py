@@ -6,9 +6,16 @@ zeep, no DB, no network. Nothing here imports app.witsml.client or app.db.
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import pytest
+
+# Make the repo root importable so integration tests can `import mockstore`
+# (the in-house WITSML mock store lives at <repo>/mockstore, a sibling of backend/).
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
 FIXTURE_DIR = Path(__file__).parent / "fixtures"
 

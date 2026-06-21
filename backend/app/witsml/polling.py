@@ -17,7 +17,7 @@ assume increasing (§11.7).
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 
 from app.domain.models import LogDataBlock
 from app.witsml.constants import Direction
@@ -25,8 +25,20 @@ from app.witsml.constants import Direction
 IndexValue = float | datetime
 
 
+def _aware(v: IndexValue) -> IndexValue:
+    """Coerce a naive datetime to UTC so naive/aware never collide.
+
+    Indices parsed from XML are tz-aware UTC, but a `last_index` restored from
+    a SQLite `DateTime(timezone=True)` column comes back NAIVE — comparing the
+    two would raise. Normalize to UTC before any comparison.
+    """
+    if isinstance(v, datetime) and v.tzinfo is None:
+        return v.replace(tzinfo=UTC)
+    return v
+
+
 def _row_indices(block: LogDataBlock) -> list[IndexValue]:
-    return [r[0] for r in block.rows if r[0] is not None]  # type: ignore[misc]
+    return [_aware(r[0]) for r in block.rows if r[0] is not None]  # type: ignore[misc]
 
 
 def continuation_index(block: LogDataBlock, direction: Direction) -> IndexValue | None:
@@ -44,6 +56,7 @@ def continuation_index(block: LogDataBlock, direction: Direction) -> IndexValue 
 
 def is_beyond(index: IndexValue, last: IndexValue, direction: Direction) -> bool:
     """True if `index` is strictly newer than `last` for the given direction."""
+    index, last = _aware(index), _aware(last)
     if direction == Direction.INCREASING:
         return index > last
     return index < last

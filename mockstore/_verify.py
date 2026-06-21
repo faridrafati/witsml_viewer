@@ -7,14 +7,13 @@ Exercises all 7 acceptance checks through app.witsml.client.WitsmlClient.
 from __future__ import annotations
 
 import asyncio
+import os
 from datetime import UTC, datetime, timedelta
 
 from lxml import etree
 
 from app.witsml.client import WitsmlClient
 from app.witsml.constants import NS_DATA, WITSML_VERSION, Direction, IndexType
-
-import os
 
 URL = os.environ.get("MOCK_URL", "http://127.0.0.1:7070/witsml/store")
 NS = NS_DATA
@@ -184,8 +183,8 @@ async def main() -> int:
         ]
         rcu, su = await client.update_in_store("log", log_update_xml(rows))
         # read header to verify objectGrowing
-        from app.witsml.queries import log_header_query
         from app.witsml.parse import parse_log_headers
+        from app.witsml.queries import log_header_query
 
         hq = log_header_query("W-1", "WB-1", "LOG-T")
         _, hx, _ = await client.get_from_store(hq.wml_type, hq.query_xml, hq.options_in)
@@ -267,8 +266,8 @@ async def main() -> int:
     # 7. mudLog round-trip
     try:
         rcm, sm = await client.add_to_store("mudLog", mudlog_xml())
-        from app.witsml.queries import mudlog_query
         from app.witsml.parse import parse_mudlogs
+        from app.witsml.queries import mudlog_query
 
         mq = mudlog_query("W-1", "WB-1", "ML-1")
         _, mx, _ = await client.get_from_store(mq.wml_type, mq.query_xml, mq.options_in)
@@ -303,7 +302,7 @@ async def main() -> int:
 
     print("\n==== SUMMARY ====")
     n_pass = sum(1 for _, s, _ in results if s == PASS)
-    for name, status, detail in results:
+    for name, status, _detail in results:
         print(f"  [{status}] {name}")
     print(f"  {n_pass}/{len(results)} checks passed")
     return 0 if n_pass == len(results) else 1

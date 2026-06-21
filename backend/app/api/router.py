@@ -1,7 +1,7 @@
 """Aggregate REST router mounted under /api.
 
-Feature routers are attached here as phases land. Discovery (Phase 1) is
-imported defensively so the app still boots if that module is mid-build.
+Feature routers are attached here as phases land. Each is imported defensively
+so the app still boots if a module is mid-build or has an import error.
 """
 
 from __future__ import annotations
@@ -13,10 +13,18 @@ from fastapi import APIRouter
 api_router = APIRouter(prefix="/api")
 log = logging.getLogger(__name__)
 
-# Phase 1 — discovery (wells/wellbores/logs/cap). Wired in when present.
-try:
-    from app.api import discovery
+# (module, attribute) pairs — all expose `router: APIRouter`.
+_FEATURE_MODULES = [
+    "app.api.discovery",  # Phase 1 — wells/wellbores/logs/cap/tree
+    "app.api.curves",  # Phase 2 — ingested curve data (/ingest)
+    "app.api.units",  # Phase 3 — unit defs + safe formula convert (/units)
+    "app.api.pages",  # Phase 3 — dashboard pages CRUD (/pages)
+    "app.api.store_write",  # Phase 4 — write path (/store)
+]
 
-    api_router.include_router(discovery.router)
-except Exception as exc:  # pragma: no cover - defensive during incremental build
-    log.warning("discovery router not mounted: %s", exc)
+for _mod in _FEATURE_MODULES:
+    try:
+        module = __import__(_mod, fromlist=["router"])
+        api_router.include_router(module.router)
+    except Exception as exc:  # pragma: no cover - defensive during incremental build
+        log.warning("router %s not mounted: %s", _mod, exc)

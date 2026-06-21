@@ -68,6 +68,18 @@ def _first(parent: etree._Element, name: str) -> etree._Element | None:
     return None
 
 
+def _root_or_first(root: etree._Element, name: str) -> etree._Element | None:
+    """The object element: a `<name>` child, or `root` itself if it IS one.
+
+    Uses explicit `is not None` — never element truth-testing (deprecated in
+    lxml and false for childless elements).
+    """
+    el = _first(root, name)
+    if el is None and _local(root) == name:
+        el = root
+    return el
+
+
 def _text(parent: etree._Element, name: str) -> str | None:
     el = _first(parent, name)
     if el is None or el.text is None:
@@ -248,7 +260,7 @@ class MockStore:
         return RC_ERROR_BAD_INPUT, f"unsupported WMLtypeIn '{wml_type}'"
 
     def _add_well(self, root: etree._Element) -> tuple[int, str | None]:
-        el = _first(root, "well") or (root if _local(root) == "well" else None)
+        el = _root_or_first(root, "well")
         if el is None:
             return RC_ERROR_BAD_INPUT, "no <well> element in XMLin"
         uid = el.get("uid") or ""
@@ -260,9 +272,7 @@ class MockStore:
         return RC_SUCCESS, None
 
     def _add_wellbore(self, root: etree._Element) -> tuple[int, str | None]:
-        el = _first(root, "wellbore") or (
-            root if _local(root) == "wellbore" else None
-        )
+        el = _root_or_first(root, "wellbore")
         if el is None:
             return RC_ERROR_BAD_INPUT, "no <wellbore> element in XMLin"
         uid = el.get("uid") or ""
@@ -276,7 +286,7 @@ class MockStore:
         return RC_SUCCESS, None
 
     def _add_log(self, root: etree._Element) -> tuple[int, str | None]:
-        el = _first(root, "log") or (root if _local(root) == "log" else None)
+        el = _root_or_first(root, "log")
         if el is None:
             return RC_ERROR_BAD_INPUT, "no <log> element in XMLin"
         uid = el.get("uid") or ""
@@ -327,7 +337,7 @@ class MockStore:
         return RC_SUCCESS, None
 
     def _add_mudlog(self, root: etree._Element) -> tuple[int, str | None]:
-        el = _first(root, "mudLog") or (root if _local(root) == "mudLog" else None)
+        el = _root_or_first(root, "mudLog")
         if el is None:
             return RC_ERROR_BAD_INPUT, "no <mudLog> element in XMLin"
         uid = el.get("uid") or ""
@@ -374,7 +384,7 @@ class MockStore:
         return RC_ERROR_BAD_INPUT, f"unsupported WMLtypeIn '{wml_type}'"
 
     def _update_log(self, root: etree._Element) -> tuple[int, str | None]:
-        el = _first(root, "log") or (root if _local(root) == "log" else None)
+        el = _root_or_first(root, "log")
         if el is None:
             return RC_ERROR_BAD_INPUT, "no <log> element in XMLin"
         uid = el.get("uid") or ""
@@ -390,7 +400,7 @@ class MockStore:
         return RC_SUCCESS, None
 
     def _update_mudlog(self, root: etree._Element) -> tuple[int, str | None]:
-        el = _first(root, "mudLog") or (root if _local(root) == "mudLog" else None)
+        el = _root_or_first(root, "mudLog")
         if el is None:
             return RC_ERROR_BAD_INPUT, "no <mudLog> element in XMLin"
         uid = el.get("uid") or ""
@@ -435,17 +445,14 @@ class MockStore:
                 continue
             # map incoming cells by mnemonic
             value_by_mnem = {
-                incoming[i]: cells[i]
-                for i in range(min(len(incoming), len(cells)))
+                incoming[i]: cells[i] for i in range(min(len(incoming), len(cells)))
             }
             index_token = cells[index_pos] if cells else ""
             idx_val = _parse_index(index_token, log.index_type)
             if idx_val is None:
                 continue
             # assemble a full row in store column order
-            row = [
-                value_by_mnem.get(m, log.null_value) for m in store_cols
-            ]
+            row = [value_by_mnem.get(m, log.null_value) for m in store_cols]
             # store index cell verbatim (preserve the exact token written)
             row[0] = index_token
             log.rows[idx_val] = row
@@ -937,17 +944,19 @@ def _after(idx: object, end: object, direction: Direction) -> bool:
     return idx < end  # type: ignore[operator]
 
 
-def _query_range(
-    q: etree._Element, index_type: IndexType
-) -> tuple[object, object]:
+def _query_range(q: etree._Element, index_type: IndexType) -> tuple[object, object]:
     """Extract (start, end) from a <log> query element, typed by index."""
     if index_type.is_time:
-        start = _parse_dt(_text(q, "startDateTimeIndex") or "") if _text(
-            q, "startDateTimeIndex"
-        ) else None
-        end = _parse_dt(_text(q, "endDateTimeIndex") or "") if _text(
-            q, "endDateTimeIndex"
-        ) else None
+        start = (
+            _parse_dt(_text(q, "startDateTimeIndex") or "")
+            if _text(q, "startDateTimeIndex")
+            else None
+        )
+        end = (
+            _parse_dt(_text(q, "endDateTimeIndex") or "")
+            if _text(q, "endDateTimeIndex")
+            else None
+        )
         return start, end
     s = _text(q, "startIndex")
     e = _text(q, "endIndex")
