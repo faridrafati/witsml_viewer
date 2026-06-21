@@ -121,7 +121,5 @@ async def convert_value(payload: ConvertIn) -> ConvertOut:
     try:
         result = convert(payload.value, payload.expression)
     except UnitFormulaError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)
-        ) from exc
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
     return ConvertOut(result=result)

@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import OilBarrelIcon from '@mui/icons-material/OilBarrel';
 import DashboardIcon from '@mui/icons-material/Dashboard';
+import ViewQuiltIcon from '@mui/icons-material/ViewQuilt';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import FunctionsIcon from '@mui/icons-material/Functions';
 import DescriptionIcon from '@mui/icons-material/Description';
@@ -32,6 +33,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: 'Wells', to: '/', icon: <OilBarrelIcon /> },
   { label: 'Dashboard', to: '/dashboard', icon: <DashboardIcon /> },
+  { label: 'Pages', to: '/pages', icon: <ViewQuiltIcon /> },
   { label: 'Comparison', to: '/comparison', icon: <CompareArrowsIcon /> },
   { label: 'Formulas', to: '/formulas', icon: <FunctionsIcon /> },
   { label: 'Reports', to: '/reports', icon: <DescriptionIcon /> },

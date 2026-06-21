@@ -113,9 +113,7 @@ class LogBody(BaseModel):
 
 # ── XML builders (WITSML 1.4.1.1, data namespace default) ────────────────
 def _root(plural: str) -> etree._Element:
-    return etree.Element(
-        f"{{{NS_DATA}}}{plural}", nsmap={None: NS_DATA}, version=WITSML_VERSION
-    )
+    return etree.Element(f"{{{NS_DATA}}}{plural}", nsmap={None: NS_DATA}, version=WITSML_VERSION)
 
 
 def _sub(
@@ -168,9 +166,7 @@ def build_wellbore_xml(body: WellboreBody) -> str:
 
 def build_log_xml(body: LogBody) -> str:
     root = _root("logs")
-    log_el = _sub(
-        root, "log", uid=body.uid, uidWell=body.uidWell, uidWellbore=body.uidWellbore
-    )
+    log_el = _sub(root, "log", uid=body.uid, uidWell=body.uidWell, uidWellbore=body.uidWellbore)
     if body.nameWell is not None:
         _sub(log_el, "nameWell", body.nameWell)
     if body.nameWellbore is not None:
@@ -198,9 +194,7 @@ def build_log_xml(body: LogBody) -> str:
 
 
 # ── write execution ──────────────────────────────────────────────────────
-async def _add(
-    client: WitsmlClient, wml_type: str, xml_in: str, *, what: str
-) -> dict[str, object]:
+async def _add(client: WitsmlClient, wml_type: str, xml_in: str, *, what: str) -> dict[str, object]:
     """Run AddToStore, mapping transport errors to 502 and bad codes to 400."""
     try:
         return_code, supp_msg = await client.add_to_store(wml_type, xml_in)
@@ -209,9 +203,7 @@ async def _add(
         raise _bad_gateway(f"WITSML store error while adding {what}: {exc}") from exc
     except Exception as exc:  # transport/SOAP failures
         log.warning("transport error adding %s: %s", what, exc)
-        raise _bad_gateway(
-            f"Failed to reach WITSML store while adding {what}."
-        ) from exc
+        raise _bad_gateway(f"Failed to reach WITSML store while adding {what}.") from exc
     return _result(return_code, supp_msg, what=f"add {what}")
 
 
@@ -226,9 +218,7 @@ async def _update(
         raise _bad_gateway(f"WITSML store error while updating {what}: {exc}") from exc
     except Exception as exc:
         log.warning("transport error updating %s: %s", what, exc)
-        raise _bad_gateway(
-            f"Failed to reach WITSML store while updating {what}."
-        ) from exc
+        raise _bad_gateway(f"Failed to reach WITSML store while updating {what}.") from exc
     return _result(return_code, supp_msg, what=f"update {what}")
 
 
@@ -237,9 +227,7 @@ def _result(return_code: int, supp_msg: str | None, *, what: str) -> dict[str, o
     if not is_success(return_code):
         base = supp_msg or "no detail provided by server"
         log.warning("WITSML non-success (%s) on %s: %s", return_code, what, base)
-        raise _bad_request(
-            f"WITSML store returned code {return_code} on {what}: {base}"
-        )
+        raise _bad_request(f"WITSML store returned code {return_code} on {what}: {base}")
     return {"returnCode": return_code, "message": supp_msg or ""}
 
 
@@ -261,9 +249,7 @@ async def update_in_store(
 
 
 @router.post("/well")
-async def add_well(
-    body: WellBody, client: WitsmlClient = Depends(get_client)
-) -> dict[str, object]:
+async def add_well(body: WellBody, client: WitsmlClient = Depends(get_client)) -> dict[str, object]:
     """Build a WITSML 1.4.1.1 <well> from JSON and AddToStore."""
     return await _add(client, "well", build_well_xml(body), what="well")
 
@@ -277,8 +263,6 @@ async def add_wellbore(
 
 
 @router.post("/log")
-async def add_log(
-    body: LogBody, client: WitsmlClient = Depends(get_client)
-) -> dict[str, object]:
+async def add_log(body: LogBody, client: WitsmlClient = Depends(get_client)) -> dict[str, object]:
     """Build a WITSML 1.4.1.1 <log> header from JSON and AddToStore."""
     return await _add(client, "log", build_log_xml(body), what="log")

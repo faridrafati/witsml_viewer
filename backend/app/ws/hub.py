@@ -57,9 +57,7 @@ async def _focus(app: FastAPI, well_uid: str) -> None:
 def _snapshot_frame(well_uid: str) -> dict:
     store = get_store()
     recent = store.get_recent(well_uid, limit=300)
-    curves = {
-        mnem: [sample_to_wire(s) for s in samples] for mnem, samples in recent.items()
-    }
+    curves = {mnem: [sample_to_wire(s) for s in samples] for mnem, samples in recent.items()}
     return {"type": "snapshot", "wellUid": well_uid, "curves": curves}
 
 

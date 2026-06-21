@@ -162,9 +162,7 @@ class WitsmlClient:
             )
             transport = AsyncTransport(client=self._httpx, wsdl_client=wsdl_client)
             zeep_settings = ZeepSettings(strict=False, xml_huge_tree=True)
-            self._zeep = AsyncClient(
-                self._wsdl, transport=transport, settings=zeep_settings
-            )
+            self._zeep = AsyncClient(self._wsdl, transport=transport, settings=zeep_settings)
         return self._zeep
 
     async def _service(self) -> Any:
@@ -345,9 +343,7 @@ class WitsmlClient:
         )
 
     # ── errors / teardown ───────────────────────────────────────────────
-    async def _error(
-        self, return_code: int | None, supp_msg: str | None
-    ) -> WitsmlError:
+    async def _error(self, return_code: int | None, supp_msg: str | None) -> WitsmlError:
         """Build a WitsmlError, enriching with the server's base message."""
         parts: list[str] = []
         if return_code is not None:

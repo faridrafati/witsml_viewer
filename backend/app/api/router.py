@@ -19,7 +19,9 @@ _FEATURE_MODULES = [
     "app.api.curves",  # Phase 2 — ingested curve data (/ingest)
     "app.api.units",  # Phase 3 — unit defs + safe formula convert (/units)
     "app.api.pages",  # Phase 3 — dashboard pages CRUD (/pages)
+    "app.api.parameters",  # Phase 3 — parameter catalog CRUD (/parameters)
     "app.api.store_write",  # Phase 4 — write path (/store)
+    "app.api.comparison",  # Phase 5 — multi-well comparison + lithology (/comparison)
 ]
 
 for _mod in _FEATURE_MODULES:

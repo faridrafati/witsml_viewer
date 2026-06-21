@@ -140,9 +140,7 @@ class IngestionScheduler:
 
             elapsed = asyncio.get_event_loop().time() - started
             try:
-                await asyncio.wait_for(
-                    self._stop.wait(), timeout=max(0.0, interval - elapsed)
-                )
+                await asyncio.wait_for(self._stop.wait(), timeout=max(0.0, interval - elapsed))
             except TimeoutError:
                 pass
 
@@ -163,10 +161,7 @@ class IngestionScheduler:
         # Viewed wells (focused or subscribed) go first so their deltas are
         # freshest; the rest follow to keep all 20 wells warm.
         def _is_viewed(h: LogHeader) -> bool:
-            return (
-                h.uid_well == self._focused
-                or self._store.subscriber_count(h.uid_well) > 0
-            )
+            return h.uid_well == self._focused or self._store.subscriber_count(h.uid_well) > 0
 
         ordered = sorted(headers, key=lambda h: 0 if _is_viewed(h) else 1)
 
@@ -273,15 +268,11 @@ class IngestionScheduler:
         try:
             await self._persist_samples(header, state, samples)
         except Exception:  # noqa: BLE001 — persistence is best-effort vs. live
-            logger.exception(
-                "ingestion: failed to persist samples for log %s", header.uid
-            )
+            logger.exception("ingestion: failed to persist samples for log %s", header.uid)
 
     def _state_from_header(self, header: LogHeader) -> LogState:
         """Build initial LogState from a freshly discovered header."""
-        index_mnem = header.index_curve or (
-            header.mnemonics[0] if header.mnemonics else ""
-        )
+        index_mnem = header.index_curve or (header.mnemonics[0] if header.mnemonics else "")
         mnems = list(header.mnemonics)
         # Guarantee the index mnemonic leads the list (brief §6).
         if index_mnem and index_mnem in mnems:
@@ -354,23 +345,17 @@ class IngestionScheduler:
 
     async def _fetch_wells(self):
         q = well_query(return_elements=ReturnElements.REQUESTED)
-        _, xml, _ = await self._client.get_from_store(
-            q.wml_type, q.query_xml, q.options_in
-        )
+        _, xml, _ = await self._client.get_from_store(q.wml_type, q.query_xml, q.options_in)
         return parse_wells(xml or "")
 
     async def _fetch_wellbores(self, uid_well: str):
         q = wellbore_query(uid_well, return_elements=ReturnElements.REQUESTED)
-        _, xml, _ = await self._client.get_from_store(
-            q.wml_type, q.query_xml, q.options_in
-        )
+        _, xml, _ = await self._client.get_from_store(q.wml_type, q.query_xml, q.options_in)
         return parse_wellbores(xml or "")
 
     async def _fetch_log_headers(self, uid_well: str, uid_wellbore: str):
         q = log_header_query(uid_well, uid_wellbore)
-        _, xml, _ = await self._client.get_from_store(
-            q.wml_type, q.query_xml, q.options_in
-        )
+        _, xml, _ = await self._client.get_from_store(q.wml_type, q.query_xml, q.options_in)
         return parse_log_headers(xml or "")
 
     # ── Postgres persistence ────────────────────────────────────────────
@@ -386,9 +371,7 @@ class IngestionScheduler:
                 log_uid=header.uid,
                 mnemonic=s.mnemonic,
                 index_float=None if is_time else _as_float(s.index),
-                index_dt=(
-                    s.index if (is_time and isinstance(s.index, datetime)) else None
-                ),
+                index_dt=(s.index if (is_time and isinstance(s.index, datetime)) else None),
                 value=s.value,
                 text=s.text,
                 uom=s.uom,
@@ -408,9 +391,7 @@ class IngestionScheduler:
         """
         async with SessionLocal() as session:
             result = await session.execute(
-                select(IndexCacheSnapshot).where(
-                    IndexCacheSnapshot.server_id == self.server_id
-                )
+                select(IndexCacheSnapshot).where(IndexCacheSnapshot.server_id == self.server_id)
             )
             snaps = result.scalars().all()
 
@@ -472,8 +453,7 @@ class IngestionScheduler:
                 .all()
             )
             existing = {
-                (r.well_uid, r.wellbore_uid, r.log_uid, r.mnemonic): r
-                for r in existing_rows
+                (r.well_uid, r.wellbore_uid, r.log_uid, r.mnemonic): r for r in existing_rows
             }
 
             for state in states:
@@ -539,9 +519,7 @@ def _index_type_from_str(value: str | None) -> IndexType:
     return IndexType.OTHER
 
 
-def _cursor_from_snap(
-    snap: IndexCacheSnapshot, index_type: IndexType, direction: Direction
-):
+def _cursor_from_snap(snap: IndexCacheSnapshot, index_type: IndexType, direction: Direction):
     if index_type.is_time:
         return snap.last_index_dt
     return snap.last_index_float

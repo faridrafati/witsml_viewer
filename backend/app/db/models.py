@@ -45,9 +45,7 @@ class ServerConnection(Base):
     verify_ssl: Mapped[bool] = mapped_column(Boolean, default=True)
     version: Mapped[str | None] = mapped_column(String(20), nullable=True)
     cap_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=_utcnow
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
 
 
 # ── Basic Well Information (app-owned metadata, linked by uid) ───────────
@@ -106,9 +104,7 @@ class DashboardPage(Base):
     # Full component tree: list of {type, mnemonic(s), root, back_config,
     # comment_config, numerics_config, chart_numeric_config, time_config, ...}
     layout: Mapped[dict] = mapped_column(JSON, default=dict)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=_utcnow
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_utcnow, onupdate=_utcnow
     )
@@ -131,9 +127,7 @@ class User(Base):
     position: Mapped[str | None] = mapped_column(String(120), nullable=True)
     access_level: Mapped[str] = mapped_column(String(20), default="normal")
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=_utcnow
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
 
     page_grants: Mapped[list[PageGrant]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
@@ -146,9 +140,7 @@ class PageGrant(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
-    page_id: Mapped[int] = mapped_column(
-        ForeignKey("dashboard_pages.id", ondelete="CASCADE")
-    )
+    page_id: Mapped[int] = mapped_column(ForeignKey("dashboard_pages.id", ondelete="CASCADE"))
     user: Mapped[User] = relationship(back_populates="page_grants")
 
 
@@ -167,9 +159,7 @@ class CurveSampleRow(Base):
     log_uid: Mapped[str] = mapped_column(String(200))
     mnemonic: Mapped[str] = mapped_column(String(60))
     index_float: Mapped[float | None] = mapped_column(Float, nullable=True)
-    index_dt: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    index_dt: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     value: Mapped[float | None] = mapped_column(Float, nullable=True)
     text: Mapped[str | None] = mapped_column(String(300), nullable=True)
     uom: Mapped[str | None] = mapped_column(String(40), nullable=True)
@@ -196,9 +186,7 @@ class IndexCacheSnapshot(Base):
     log_uid: Mapped[str] = mapped_column(String(200))
     mnemonic: Mapped[str] = mapped_column(String(60))
     last_index_float: Mapped[float | None] = mapped_column(Float, nullable=True)
-    last_index_dt: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    last_index_dt: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     uom: Mapped[str | None] = mapped_column(String(40), nullable=True)
     direction: Mapped[str] = mapped_column(String(20), default="increasing")
     index_type: Mapped[str] = mapped_column(String(20), default="measured depth")

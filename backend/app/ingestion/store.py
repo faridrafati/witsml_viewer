@@ -121,9 +121,7 @@ class RingBufferStore:
         return sorted({k[1] for k in self._curves if k[0] == well_uid})
 
     # ── well metadata / status ──────────────────────────────────────────
-    def set_well_meta(
-        self, well_uid: str, name: str | None, region: str | None
-    ) -> None:
+    def set_well_meta(self, well_uid: str, name: str | None, region: str | None) -> None:
         self._well_meta[well_uid] = {"name": name, "region": region}
 
     def well_uids(self) -> list[str]:
@@ -137,9 +135,7 @@ class RingBufferStore:
             mnems = self.curve_mnemonics(uid)
             count = sum(len(self._curves[(uid, m)]) for m in mnems)
             growing = any(
-                st.object_growing
-                for st in self._log_states.values()
-                if st.well_uid == uid
+                st.object_growing for st in self._log_states.values() if st.well_uid == uid
             )
             out.append(
                 WellStatus(

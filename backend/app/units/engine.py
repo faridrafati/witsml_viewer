@@ -129,13 +129,9 @@ def _check_exponent(exp_node: ast.AST) -> None:
     A non-constant exponent (e.g. ``__value__ ** __value__``) is rejected
     outright because we cannot bound it statically.
     """
-    if isinstance(exp_node, ast.UnaryOp) and isinstance(
-        exp_node.op, (ast.USub, ast.UAdd)
-    ):
+    if isinstance(exp_node, ast.UnaryOp) and isinstance(exp_node.op, (ast.USub, ast.UAdd)):
         exp_node = exp_node.operand
-    if not (
-        isinstance(exp_node, ast.Constant) and isinstance(exp_node.value, (int, float))
-    ):
+    if not (isinstance(exp_node, ast.Constant) and isinstance(exp_node.value, (int, float))):
         raise UnitFormulaError("exponent must be a numeric literal")
     if abs(exp_node.value) > MAX_EXPONENT:
         raise UnitFormulaError(f"exponent magnitude exceeds {MAX_EXPONENT}")
@@ -215,6 +211,4 @@ def convert(value: float, expression: str) -> float:
     try:
         return float(result)
     except (TypeError, ValueError) as exc:
-        raise UnitFormulaError(
-            f"expression did not produce a number: {result!r}"
-        ) from exc
+        raise UnitFormulaError(f"expression did not produce a number: {result!r}") from exc

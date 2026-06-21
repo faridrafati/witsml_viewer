@@ -95,9 +95,7 @@ def well_query(
     _sub(well, "operator")
     _sub(well, "statusWell")
     _sub(well, "timeZone")
-    return QbeQuery(
-        "well", _serialize(root), options_in(**{OPT_RETURN_ELEMENTS: return_elements})
-    )
+    return QbeQuery("well", _serialize(root), options_in(**{OPT_RETURN_ELEMENTS: return_elements}))
 
 
 def wellbore_query(
@@ -122,9 +120,7 @@ def wellbore_query(
 
 
 # ── log: header-only ────────────────────────────────────────────────────
-def log_header_query(
-    uid_well: str, uid_wellbore: str, uid: str | None = None
-) -> QbeQuery:
+def log_header_query(uid_well: str, uid_wellbore: str, uid: str | None = None) -> QbeQuery:
     """Learn a log's curves/units/direction/nullValue (run once per log)."""
     root = _root("logs")
     log = _sub(root, "log", uidWell=uid_well, uidWellbore=uid_wellbore, uid=uid or "")

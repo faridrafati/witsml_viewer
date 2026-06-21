@@ -81,9 +81,7 @@ async def _query(
         raise _bad_gateway(f"WITSML store error while fetching {what}: {exc}") from exc
     except Exception as exc:  # transport/SOAP/parse failures
         log.warning("transport error fetching %s: %s", what, exc)
-        raise _bad_gateway(
-            f"Failed to reach WITSML store while fetching {what}."
-        ) from exc
+        raise _bad_gateway(f"Failed to reach WITSML store while fetching {what}.") from exc
 
     if not is_success(return_code) or xml_out is None:
         base = supp_msg or "no detail provided by server"
@@ -206,8 +204,6 @@ async def get_tree(client: WitsmlClient = Depends(get_client)) -> list[Well]:
             )
             well.wellbores = parse_wellbores(wb_xml)
         except HTTPException as exc:
-            log.warning(
-                "tree: skipping wellbores for well %s: %s", well.uid, exc.detail
-            )
+            log.warning("tree: skipping wellbores for well %s: %s", well.uid, exc.detail)
             well.wellbores = []
     return wells

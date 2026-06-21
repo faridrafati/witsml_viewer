@@ -52,18 +52,13 @@ DEFAULT_UNIT_DEFS: list[tuple[str, str, str, str]] = [
 
 
 async def seed_parameter_catalog(session) -> int:
-    existing = {
-        row[0]
-        for row in (await session.execute(select(ParameterCatalog.mnemonic))).all()
-    }
+    existing = {row[0] for row in (await session.execute(select(ParameterCatalog.mnemonic))).all()}
     added = 0
     for mnemonic, desc, unit, wits in PARAMETER_CATALOG:
         if mnemonic in existing:
             continue
         session.add(
-            ParameterCatalog(
-                mnemonic=mnemonic, description=desc, default_unit=unit, wits_id=wits
-            )
+            ParameterCatalog(mnemonic=mnemonic, description=desc, default_unit=unit, wits_id=wits)
         )
         added += 1
     return added
@@ -72,28 +67,20 @@ async def seed_parameter_catalog(session) -> int:
 async def seed_unit_defs(session) -> int:
     existing = {
         (r[0], r[1])
-        for r in (
-            await session.execute(select(UnitDef.from_unit, UnitDef.to_unit))
-        ).all()
+        for r in (await session.execute(select(UnitDef.from_unit, UnitDef.to_unit))).all()
     }
     added = 0
     for name, frm, to, expr in DEFAULT_UNIT_DEFS:
         if (frm, to) in existing:
             continue
-        session.add(
-            UnitDef(
-                name=name, from_unit=frm, to_unit=to, expression=expr, is_builtin=True
-            )
-        )
+        session.add(UnitDef(name=name, from_unit=frm, to_unit=to, expression=expr, is_builtin=True))
         added += 1
     return added
 
 
 async def seed_superadmin(session) -> bool:
     existing = (
-        await session.execute(
-            select(User).where(User.username == settings.superadmin_username)
-        )
+        await session.execute(select(User).where(User.username == settings.superadmin_username))
     ).scalar_one_or_none()
     if existing:
         return False

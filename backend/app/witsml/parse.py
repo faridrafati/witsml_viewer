@@ -294,9 +294,7 @@ def parse_log_data(
                 decoded.append(_decode_cell(raw, col == 0, itype, nulls))
             rows.append(decoded)
 
-        block = LogDataBlock(
-            mnemonics=mnemonics, units=units, index_type=itype, rows=rows
-        )
+        block = LogDataBlock(mnemonics=mnemonics, units=units, index_type=itype, rows=rows)
         results.append(
             LogDataResult(
                 uid=log_el.get("uid", ""),
@@ -409,9 +407,7 @@ def parse_cap(xml: XmlLike) -> ServerCap:
     cap.max_request_latest_values = _int(_text(server, "maxRequestLatestValues"))
     for fn in _descendants(server, "function"):
         fname = fn.get("name") or ""
-        objs = {
-            _text(o, "dataObject") or o.text or "" for o in _children(fn, "dataObject")
-        }
+        objs = {_text(o, "dataObject") or o.text or "" for o in _children(fn, "dataObject")}
         objs |= {(o.text or "").strip() for o in _descendants(fn, "dataObject")}
         cap.supported_objects[fname] = {o for o in objs if o}
     cap.raw = etree.tostring(root, encoding="unicode")

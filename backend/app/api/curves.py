@@ -65,9 +65,7 @@ def get_curves(
     recent = get_store().get_recent(well_uid, mnems, limit=limit)
     return {
         "wellUid": well_uid,
-        "curves": {
-            m: [sample_to_wire(s) for s in samples] for m, samples in recent.items()
-        },
+        "curves": {m: [sample_to_wire(s) for s in samples] for m, samples in recent.items()},
     }
 
 
@@ -110,16 +108,12 @@ async def get_history(
     for bound, op in ((start_idx, "ge"), (end_idx, "le")):
         if bound is None:
             continue
-        col = (
-            CurveSampleRow.index_dt
-            if isinstance(bound, datetime)
-            else CurveSampleRow.index_float
-        )
+        col = CurveSampleRow.index_dt if isinstance(bound, datetime) else CurveSampleRow.index_float
         stmt = stmt.where(col >= bound if op == "ge" else col <= bound)
 
-    stmt = stmt.order_by(
-        CurveSampleRow.index_float.asc(), CurveSampleRow.index_dt.asc()
-    ).limit(limit)
+    stmt = stmt.order_by(CurveSampleRow.index_float.asc(), CurveSampleRow.index_dt.asc()).limit(
+        limit
+    )
 
     rows = (await session.execute(stmt)).scalars().all()
 

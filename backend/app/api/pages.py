@@ -99,9 +99,7 @@ async def create_page(
 
 
 @router.get("/{page_id}", response_model=PageOut)
-async def get_page(
-    page_id: int, session: AsyncSession = Depends(get_session)
-) -> DashboardPage:
+async def get_page(page_id: int, session: AsyncSession = Depends(get_session)) -> DashboardPage:
     return await _get_or_404(session, page_id)
 
 
@@ -119,9 +117,7 @@ async def update_page(
 
 
 @router.delete("/{page_id}", status_code=204)
-async def delete_page(
-    page_id: int, session: AsyncSession = Depends(get_session)
-) -> None:
+async def delete_page(page_id: int, session: AsyncSession = Depends(get_session)) -> None:
     page = await _get_or_404(session, page_id)
     await session.delete(page)
     await session.commit()
