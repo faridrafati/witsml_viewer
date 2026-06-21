@@ -9,11 +9,12 @@ Alembic autogenerate see one metadata object.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 
 from sqlalchemy import (
     JSON,
     Boolean,
+    Date,
     DateTime,
     Float,
     ForeignKey,
@@ -193,3 +194,92 @@ class IndexCacheSnapshot(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_utcnow, onupdate=_utcnow
     )
+
+
+# ── P7 reporting (brief §7.11): daily reports, remarks, mud spec ─────────
+class Report(Base):
+    """A daily drilling / mudlogging report header.
+
+    Carries the operational context (field, rig, well, hole size, operation
+    type, mud system) used to filter and group remarks and mud properties.
+    """
+
+    __tablename__ = "reports"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    report_date: Mapped[date | None] = mapped_column(Date, nullable=True, index=True)
+    field: Mapped[str | None] = mapped_column(String(200), nullable=True, index=True)
+    rig: Mapped[str | None] = mapped_column(String(200), nullable=True, index=True)
+    well_uid: Mapped[str | None] = mapped_column(String(200), nullable=True, index=True)
+    hole_size: Mapped[str | None] = mapped_column(String(60), nullable=True)
+    operation_type: Mapped[str | None] = mapped_column(String(120), nullable=True, index=True)
+    mud_system: Mapped[str | None] = mapped_column(String(120), nullable=True, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+    remarks: Mapped[list[Remark]] = relationship(
+        back_populates="report", cascade="all, delete-orphan"
+    )
+    mud_properties: Mapped[list[MudProperty]] = relationship(
+        back_populates="report", cascade="all, delete-orphan"
+    )
+
+
+class Remark(Base):
+    """A free-text remark / observation attached to a report.
+
+    `text` and `category` are the searchable fields (keyword substring); the
+    optional `time`/`depth` anchor the remark to a moment / position.
+    """
+
+    __tablename__ = "remarks"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    report_id: Mapped[int] = mapped_column(ForeignKey("reports.id", ondelete="CASCADE"), index=True)
+    time: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    depth: Mapped[float | None] = mapped_column(Float, nullable=True)
+    category: Mapped[str | None] = mapped_column(String(120), nullable=True, index=True)
+    text: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    report: Mapped[Report] = relationship(back_populates="remarks")
+
+
+class MudProperty(Base):
+    """One row of the drilling-fluid spec table for a report (name/value/unit)."""
+
+    __tablename__ = "mud_properties"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    report_id: Mapped[int] = mapped_column(ForeignKey("reports.id", ondelete="CASCADE"), index=True)
+    name: Mapped[str] = mapped_column(String(120))
+    value: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    unit: Mapped[str | None] = mapped_column(String(40), nullable=True)
+
+    report: Mapped[Report] = relationship(back_populates="mud_properties")
+
+
+class SavedSearch(Base):
+    """A reusable, named search (criteria as opaque JSON) scoped to a module."""
+
+    __tablename__ = "saved_searches"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(200))
+    owner_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    module: Mapped[str] = mapped_column(String(60), index=True)
+    criteria: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
+
+
+class DepthOfInterest(Base):
+    """A user-flagged depth (optionally tied to a report) with a free-text note."""
+
+    __tablename__ = "depths_of_interest"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    well_uid: Mapped[str] = mapped_column(String(200), index=True)
+    report_id: Mapped[int | None] = mapped_column(
+        ForeignKey("reports.id", ondelete="SET NULL"), nullable=True
+    )
+    depth: Mapped[float] = mapped_column(Float)
+    note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)

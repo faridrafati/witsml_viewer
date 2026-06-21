@@ -6,6 +6,11 @@ import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import App from './App';
 import { theme } from './theme';
+// Side-effect import: registers the axios Bearer-token interceptor app-wide.
+import { refreshSession } from './api/auth';
+
+// Re-hydrate the logged-in user from a persisted token (best-effort).
+void refreshSession();
 
 const queryClient = new QueryClient({
   defaultOptions: {

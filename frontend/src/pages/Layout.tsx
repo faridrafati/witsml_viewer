@@ -3,6 +3,7 @@ import { Link as RouterLink, useLocation } from 'react-router-dom';
 import {
   AppBar,
   Box,
+  Button,
   Chip,
   CircularProgress,
   Drawer,
@@ -10,9 +11,11 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Stack,
   Toolbar,
   Typography,
 } from '@mui/material';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import OilBarrelIcon from '@mui/icons-material/OilBarrel';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import ViewQuiltIcon from '@mui/icons-material/ViewQuilt';
@@ -21,6 +24,8 @@ import FunctionsIcon from '@mui/icons-material/Functions';
 import DescriptionIcon from '@mui/icons-material/Description';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { useHealth } from '../api/queries';
+import { useAuthStore } from '../store/auth';
+import { logout } from '../api/auth';
 
 const DRAWER_WIDTH = 240;
 
@@ -53,6 +58,31 @@ function HealthChip() {
   return <Chip size="small" color="success" label="API online" />;
 }
 
+function AuthControl() {
+  const user = useAuthStore((s) => s.user);
+  if (user) {
+    return (
+      <Stack direction="row" spacing={1} alignItems="center">
+        <Chip
+          size="small"
+          icon={<AccountCircleIcon />}
+          label={`${user.username} (${user.access_level})`}
+          variant="outlined"
+          sx={{ color: 'inherit', borderColor: 'rgba(255,255,255,0.4)' }}
+        />
+        <Button color="inherit" size="small" onClick={() => logout()}>
+          Logout
+        </Button>
+      </Stack>
+    );
+  }
+  return (
+    <Button color="inherit" size="small" component={RouterLink} to="/login">
+      Login
+    </Button>
+  );
+}
+
 export function Layout({ children }: { children: ReactNode }) {
   const location = useLocation();
 
@@ -67,7 +97,10 @@ export function Layout({ children }: { children: ReactNode }) {
           <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
             WITSML Mudlogging Viewer
           </Typography>
-          <HealthChip />
+          <Stack direction="row" spacing={1.5} alignItems="center">
+            <HealthChip />
+            <AuthControl />
+          </Stack>
         </Toolbar>
       </AppBar>
 

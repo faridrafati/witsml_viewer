@@ -5,6 +5,10 @@ import { WellsPage } from './pages/WellsPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { PagesPage } from './pages/PagesPage';
 import { ComparisonPage } from './pages/ComparisonPage';
+import { FormulasPage } from './pages/FormulasPage';
+import { ReportsPage } from './pages/ReportsPage';
+import { AdminPage } from './pages/AdminPage';
+import { LoginPage } from './pages/LoginPage';
 
 function Placeholder({ title }: { title: string }) {
   return (
@@ -25,9 +29,10 @@ export default function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/pages" element={<PagesPage />} />
         <Route path="/comparison" element={<ComparisonPage />} />
-        <Route path="/formulas" element={<Placeholder title="Formulas" />} />
-        <Route path="/reports" element={<Placeholder title="Reports" />} />
-        <Route path="/admin" element={<Placeholder title="Admin" />} />
+        <Route path="/formulas" element={<FormulasPage />} />
+        <Route path="/reports" element={<ReportsPage />} />
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="*" element={<Placeholder title="Not Found" />} />
       </Routes>
     </Layout>

@@ -6,13 +6,21 @@ Run standalone (`python -m app.db.seed`) or imported by the API lifespan.
 from __future__ import annotations
 
 import asyncio
+from datetime import UTC, date, datetime
 
 from sqlalchemy import select
 
 from app.auth.security import hash_password
 from app.config import settings
 from app.db.base import SessionLocal, init_models
-from app.db.models import ParameterCatalog, UnitDef, User
+from app.db.models import (
+    MudProperty,
+    ParameterCatalog,
+    Remark,
+    Report,
+    UnitDef,
+    User,
+)
 
 # ── Mudlogging parameter catalog (brief §7.6) ──────────────────────────
 # (mnemonic, description, default_unit, WITS Level-0 id)
@@ -96,16 +104,142 @@ async def seed_superadmin(session) -> bool:
     return True
 
 
+# ── Sample reporting data (brief §7.11) ────────────────────────────────
+# Each entry: report header + remarks (keyword-rich) + mud-property rows.
+SAMPLE_REPORTS: list[dict] = [
+    {
+        "report_date": date(2026, 6, 18),
+        "field": "North Sea Alpha",
+        "rig": "Ocean Titan",
+        "well_uid": "W-1001",
+        "hole_size": "12 1/4 in",
+        "operation_type": "Drilling",
+        "mud_system": "Water-Based Mud",
+        "remarks": [
+            (
+                datetime(2026, 6, 18, 4, 30, tzinfo=UTC),
+                2450.0,
+                "Hazard",
+                "Observed partial lost circulation while drilling shale; pumped LCM pill.",
+            ),
+            (
+                datetime(2026, 6, 18, 9, 15, tzinfo=UTC),
+                2510.0,
+                "Operations",
+                "Connection made up, circulated bottoms up, no gas show.",
+            ),
+        ],
+        "mud_properties": [
+            ("Mud Weight", "1.25", "sg"),
+            ("Funnel Viscosity", "48", "s/qt"),
+            ("Plastic Viscosity", "18", "cP"),
+            ("Yield Point", "22", "lbf/100ft2"),
+            ("pH", "9.5", None),
+        ],
+    },
+    {
+        "report_date": date(2026, 6, 19),
+        "field": "North Sea Alpha",
+        "rig": "Ocean Titan",
+        "well_uid": "W-1001",
+        "hole_size": "8 1/2 in",
+        "operation_type": "Tripping",
+        "mud_system": "Oil-Based Mud",
+        "remarks": [
+            (
+                datetime(2026, 6, 19, 2, 0, tzinfo=UTC),
+                3120.0,
+                "Hazard",
+                "Stuck pipe event during trip out; worked string free after 40 min.",
+            ),
+            (
+                datetime(2026, 6, 19, 6, 45, tzinfo=UTC),
+                3120.0,
+                "Operations",
+                "Resumed POOH, no further overpull, racking stands.",
+            ),
+        ],
+        "mud_properties": [
+            ("Mud Weight", "1.42", "sg"),
+            ("Funnel Viscosity", "55", "s/qt"),
+            ("Oil/Water Ratio", "80/20", None),
+            ("Electrical Stability", "420", "V"),
+        ],
+    },
+    {
+        "report_date": date(2026, 6, 20),
+        "field": "Caspian Bravo",
+        "rig": "Desert Falcon",
+        "well_uid": "W-2002",
+        "hole_size": "17 1/2 in",
+        "operation_type": "Cementing",
+        "mud_system": "Water-Based Mud",
+        "remarks": [
+            (
+                datetime(2026, 6, 20, 11, 0, tzinfo=UTC),
+                1980.0,
+                "Operations",
+                "Cement job on surface casing completed, returns to surface observed.",
+            ),
+            (
+                datetime(2026, 6, 20, 14, 30, tzinfo=UTC),
+                1980.0,
+                "Hazard",
+                "Minor lost circulation during displacement; managed with low pump rate.",
+            ),
+        ],
+        "mud_properties": [
+            ("Mud Weight", "1.15", "sg"),
+            ("Funnel Viscosity", "42", "s/qt"),
+            ("Filtrate (API)", "6.5", "mL/30min"),
+            ("pH", "10.1", None),
+        ],
+    },
+]
+
+
+async def seed_reporting(session) -> int:
+    """Insert sample reports + remarks + mud properties, idempotently.
+
+    Skips entirely if any Report already exists, so re-running the seed does
+    not duplicate sample data.
+    """
+    existing = (await session.execute(select(Report.id).limit(1))).first()
+    if existing is not None:
+        return 0
+    added = 0
+    for spec in SAMPLE_REPORTS:
+        report = Report(
+            report_date=spec["report_date"],
+            field=spec["field"],
+            rig=spec["rig"],
+            well_uid=spec["well_uid"],
+            hole_size=spec["hole_size"],
+            operation_type=spec["operation_type"],
+            mud_system=spec["mud_system"],
+        )
+        report.remarks = [
+            Remark(time=t, depth=d, category=cat, text=txt) for (t, d, cat, txt) in spec["remarks"]
+        ]
+        report.mud_properties = [
+            MudProperty(name=n, value=v, unit=u) for (n, v, u) in spec["mud_properties"]
+        ]
+        session.add(report)
+        added += 1
+    return added
+
+
 async def run_seed() -> None:
     await init_models()
     async with SessionLocal() as session:
         params = await seed_parameter_catalog(session)
         units = await seed_unit_defs(session)
         admin = await seed_superadmin(session)
+        reports = await seed_reporting(session)
         await session.commit()
     print(
         f"[seed] parameters+={params} unit_defs+={units} "
-        f"superadmin={'created' if admin else 'exists'}"
+        f"superadmin={'created' if admin else 'exists'} reports+={reports}"
     )
 
 

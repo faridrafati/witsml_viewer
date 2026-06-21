@@ -22,6 +22,12 @@ _FEATURE_MODULES = [
     "app.api.parameters",  # Phase 3 — parameter catalog CRUD (/parameters)
     "app.api.store_write",  # Phase 4 — write path (/store)
     "app.api.comparison",  # Phase 5 — multi-well comparison + lithology (/comparison)
+    "app.api.formulas",  # Phase 6 — drilling-hydraulics formulas (/formulas)
+    "app.api.export",  # Phase 6 — Excel/PDF export (/export)
+    "app.api.auth",  # Phase 7 — login / me (/auth)
+    "app.api.admin",  # Phase 7 — users + page grants (/admin)
+    "app.api.servers",  # Phase 7 — WITSML server connections (/servers)
+    "app.api.reports",  # Phase 7 — reporting: remarks, mud properties, ... (/reports)
 ]
 
 for _mod in _FEATURE_MODULES:
