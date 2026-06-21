@@ -492,6 +492,13 @@ def _already_exists(supp_msg: str | None) -> bool:
     )
 
 
+def _not_found(rc: int | None, supp_msg: str | None) -> bool:
+    """A growing object vanished — the in-memory store was reset/restarted."""
+    if rc == -411:  # WITSML: query did not match an object in the store
+        return True
+    return bool(supp_msg and "not found" in supp_msg.lower())
+
+
 async def _add(client: WitsmlClient, wml_type: str, xml: str, what: str) -> bool:
     """AddToStore one object. Returns True on success or already-exists."""
     try:
@@ -537,26 +544,39 @@ async def _update_log(
     wb: WellboreState,
     state: LogState,
     rows: list[tuple[str, list[str]]],
-) -> None:
+) -> bool:
+    """Append rows to a growing log. Returns True if the log was MISSING
+    (the in-memory store was reset) so the caller can re-seed the fleet.
+    """
     try:
         rc, supp = await client.update_in_store("log", log_update_xml(wb, state, rows))
     except Exception:
         logger.exception("UpdateInStore raised for log %s", state.wml_uid)
-        return
-    if not is_success(rc):
-        logger.error(
-            "UpdateInStore failed for log %s rc=%s supp=%s", state.wml_uid, rc, supp
+        return False
+    if is_success(rc):
+        return False
+    if _not_found(rc, supp):
+        logger.warning(
+            "log %s not found (store reset?) — flagging re-seed", state.wml_uid
         )
+        return True
+    logger.error(
+        "UpdateInStore failed for log %s rc=%s supp=%s", state.wml_uid, rc, supp
+    )
+    return False
 
 
-async def tick(client: WitsmlClient, fleet: list[WellboreState], tick_no: int) -> None:
-    """Append one new row to every log; periodically burst one well."""
+async def tick(client: WitsmlClient, fleet: list[WellboreState], tick_no: int) -> bool:
+    """Append one new row to every log; periodically burst one well. Returns
+    True if any log had vanished (store reset) and the fleet needs re-seeding.
+    """
     burst_target = (
         fleet[tick_no % len(fleet)]
         if (tick_no and tick_no % BURST_EVERY_TICKS == 0)
         else None
     )
 
+    needs_reseed = False
     for wb in fleet:
         for state in wb.logs:
             if wb is burst_target:
@@ -564,7 +584,9 @@ async def tick(client: WitsmlClient, fleet: list[WellboreState], tick_no: int) -
                 logger.info("burst: %d rows into log %s", len(rows), state.wml_uid)
             else:
                 rows = [_emit_row(state)]
-            await _update_log(client, wb, state, rows)
+            if await _update_log(client, wb, state, rows):
+                needs_reseed = True
+    return needs_reseed
 
 
 # ── Entry point ────────────────────────────────────────────────────────────
@@ -594,7 +616,12 @@ async def main() -> None:
         while True:
             tick_no += 1
             try:
-                await tick(client, fleet, tick_no)
+                if await tick(client, fleet, tick_no):
+                    # The store was reset (e.g. mockstore restarted) — its
+                    # in-memory objects are gone. Re-create the whole fleet so
+                    # discovery and ingestion recover automatically.
+                    logger.warning("store appears reset — re-seeding the fleet")
+                    await seed_fleet(client, fleet)
             except Exception:  # never let one bad tick kill the rig
                 logger.exception("tick %d failed", tick_no)
             await asyncio.sleep(interval)
