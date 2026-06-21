@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<logs xmlns="http://www.witsml.org/schemas/1series" version="1.4.1.1">
+  <log uidWell="W-001" uidWellbore="WB-001" uid="LOG-DEPTH-1">
+    <nameWell>Snorre A-12</nameWell>
+    <nameWellbore>Snorre A-12 OH</nameWellbore>
+    <name>Backreaming Depth Log</name>
+    <indexType>measured depth</indexType>
+    <indexCurve>DEPT</indexCurve>
+    <direction>decreasing</direction>
+    <objectGrowing>true</objectGrowing>
+    <nullValue>-999.25</nullValue>
+    <startIndex uom="m">3000.0</startIndex>
+    <endIndex uom="m">2990.0</endIndex>
+    <logCurveInfo uid="lci-dept">
+      <mnemonic>DEPT</mnemonic>
+      <unit>m</unit>
+      <curveDescription>Measured depth</curveDescription>
+      <typeLogData>double</typeLogData>
+      <minIndex uom="m">2990.0</minIndex>
+      <maxIndex uom="m">3000.0</maxIndex>
+    </logCurveInfo>
+    <logCurveInfo uid="lci-gr">
+      <mnemonic>GR</mnemonic>
+      <unit>gAPI</unit>
+      <curveDescription>Gamma ray</curveDescription>
+      <typeLogData>double</typeLogData>
+    </logCurveInfo>
+  </log>
+</logs>

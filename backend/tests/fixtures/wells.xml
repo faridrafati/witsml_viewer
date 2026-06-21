@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wells xmlns="http://www.witsml.org/schemas/1series" version="1.4.1.1">
+  <well uid="W-001">
+    <name>Snorre A-12</name>
+    <field>Snorre</field>
+    <region>North Sea</region>
+    <country>NO</country>
+    <operator>Equinor</operator>
+    <statusWell>active</statusWell>
+    <timeZone>+01:00</timeZone>
+  </well>
+  <well uid="W-002">
+    <name>Troll B-7</name>
+    <field>Troll</field>
+    <region>North Sea</region>
+    <country>NO</country>
+    <operator>Equinor</operator>
+    <statusWell>active</statusWell>
+    <timeZone>+01:00</timeZone>
+  </well>
+  <well uid="W-003">
+    <name>Permian 31-4H</name>
+    <field>Midland</field>
+    <region>Permian Basin</region>
+    <country>US</country>
+    <operator>Acme Oil</operator>
+    <statusWell>drilling</statusWell>
+    <timeZone>-06:00</timeZone>
+  </well>
+</wells>

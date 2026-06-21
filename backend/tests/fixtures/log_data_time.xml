@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<logs xmlns="http://www.witsml.org/schemas/1series" version="1.4.1.1">
+  <log uidWell="W-001" uidWellbore="WB-001" uid="LOG-TIME-1">
+    <nullValue>-999.25</nullValue>
+    <logData>
+      <mnemonicList>TIME,ROP,WOB</mnemonicList>
+      <unitList>s,m/h,klbf</unitList>
+      <data>2026-06-21T08:00:00.000Z,12.5,25.0</data>
+      <data>2026-06-21T08:00:10.000Z,-999.25,26.0</data>
+      <data>2026-06-21T08:00:20.000Z,13.0,</data>
+      <data>2026-06-21T08:00:30.000Z,13.5,27.0</data>
+    </logData>
+  </log>
+</logs>

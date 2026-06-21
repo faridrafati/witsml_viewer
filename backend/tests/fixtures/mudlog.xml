@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mudLogs xmlns="http://www.witsml.org/schemas/1series" version="1.4.1.1">
+  <mudLog uidWell="W-001" uidWellbore="WB-001" uid="ML-001">
+    <nameWell>Snorre A-12</nameWell>
+    <nameWellbore>Snorre A-12 OH</nameWellbore>
+    <name>Main Mud Log</name>
+    <objectGrowing>true</objectGrowing>
+    <geologyInterval uid="GI-1">
+      <typeLithology>cuttings</typeLithology>
+      <mdTop uom="m">2500.0</mdTop>
+      <mdBottom uom="m">2520.0</mdBottom>
+      <description>Interbedded sandstone and shale</description>
+      <lithology uid="L-1a">
+        <type>sandstone</type>
+        <codeLith>SS</codeLith>
+        <lithPc uom="%">70</lithPc>
+        <description>Fine-grained, well sorted</description>
+      </lithology>
+      <lithology uid="L-1b">
+        <type>shale</type>
+        <codeLith>SH</codeLith>
+        <lithPc uom="%">30</lithPc>
+        <description>Dark grey, fissile</description>
+      </lithology>
+    </geologyInterval>
+    <geologyInterval uid="GI-2">
+      <typeLithology>cuttings</typeLithology>
+      <mdTop uom="m">2520.0</mdTop>
+      <mdBottom uom="m">2545.0</mdBottom>
+      <description>Predominantly limestone</description>
+      <lithology uid="L-2a">
+        <type>limestone</type>
+        <codeLith>LS</codeLith>
+        <lithPc uom="%">85</lithPc>
+        <description>Micritic, hard</description>
+      </lithology>
+      <lithology uid="L-2b">
+        <type>dolomite</type>
+        <codeLith>DOL</codeLith>
+        <lithPc uom="%">15</lithPc>
+        <description>Crystalline</description>
+      </lithology>
+    </geologyInterval>
+  </mudLog>
+</mudLogs>

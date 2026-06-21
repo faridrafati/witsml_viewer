@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wellbores xmlns="http://www.witsml.org/schemas/1series" version="1.4.1.1">
+  <wellbore uidWell="W-001" uid="WB-001">
+    <nameWell>Snorre A-12</nameWell>
+    <name>Snorre A-12 OH</name>
+    <statusWellbore>active</statusWellbore>
+  </wellbore>
+  <wellbore uidWell="W-001" uid="WB-002">
+    <nameWell>Snorre A-12</nameWell>
+    <name>Snorre A-12 ST1</name>
+    <statusWellbore>plugged</statusWellbore>
+  </wellbore>
+</wellbores>

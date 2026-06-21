@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<logs xmlns="http://www.witsml.org/schemas/1series" version="1.4.1.1">
+  <log uidWell="W-001" uidWellbore="WB-001" uid="LOG-TIME-1">
+    <nameWell>Snorre A-12</nameWell>
+    <nameWellbore>Snorre A-12 OH</nameWellbore>
+    <name>Surface Time Log</name>
+    <indexType>date time</indexType>
+    <indexCurve>TIME</indexCurve>
+    <direction>increasing</direction>
+    <objectGrowing>true</objectGrowing>
+    <nullValue>-999.25</nullValue>
+    <startDateTimeIndex>2026-06-21T08:00:00.000Z</startDateTimeIndex>
+    <endDateTimeIndex>2026-06-21T08:00:30.000Z</endDateTimeIndex>
+    <logCurveInfo uid="lci-time">
+      <mnemonic>TIME</mnemonic>
+      <unit>s</unit>
+      <curveDescription>Index time</curveDescription>
+      <typeLogData>date time</typeLogData>
+      <minDateTimeIndex>2026-06-21T08:00:00.000Z</minDateTimeIndex>
+      <maxDateTimeIndex>2026-06-21T08:00:30.000Z</maxDateTimeIndex>
+    </logCurveInfo>
+    <logCurveInfo uid="lci-rop">
+      <mnemonic>ROP</mnemonic>
+      <unit>m/h</unit>
+      <curveDescription>Rate of penetration</curveDescription>
+      <typeLogData>double</typeLogData>
+    </logCurveInfo>
+    <logCurveInfo uid="lci-wob">
+      <mnemonic>WOB</mnemonic>
+      <unit>klbf</unit>
+      <curveDescription>Weight on bit</curveDescription>
+      <typeLogData>double</typeLogData>
+    </logCurveInfo>
+  </log>
+</logs>

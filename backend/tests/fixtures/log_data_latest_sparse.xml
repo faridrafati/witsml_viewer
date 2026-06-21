@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<logs xmlns="http://www.witsml.org/schemas/1series" version="1.4.1.1">
+  <log uidWell="W-001" uidWellbore="WB-001" uid="LOG-DEPTH-INC">
+    <indexType>measured depth</indexType>
+    <nullValue>-999.25</nullValue>
+    <logData>
+      <mnemonicList>DEPT,GR,RHOB</mnemonicList>
+      <unitList>m,gAPI,g/cm3</unitList>
+      <data>2501.5,47.1,</data>
+      <data>2501.5,,2.33</data>
+      <data>2501.0,44.8,</data>
+      <data>2501.0,,2.30</data>
+    </logData>
+  </log>
+</logs>

@@ -1,0 +1,106 @@
+# ════════════════════════════════════════════════════════════════════════
+#  WITSML Mudlogging Monitor — full testable stack.
+#  `docker compose up` brings up: postgres, redis, drillflow (WITSML test
+#  server), api (FastAPI BFF), simulator (20-well feed), web (React/Vite).
+# ════════════════════════════════════════════════════════════════════════
+name: witsml-mudlogging
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: witsml
+      POSTGRES_PASSWORD: witsml
+      POSTGRES_DB: witsml
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U witsml -d witsml"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # WITSML 1.4.1.1 test server (Java/Spring thin facade). Good for protocol
+  # testing. Swap for PDS WITSMLstudio Store for deeper conformance (README).
+  drillflow:
+    image: hashmapinc/drillflow:latest
+    ports:
+      - "7070:7070"
+    healthcheck:
+      # Drillflow serves the Store WSDL; a 200/non-empty response = up.
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:7070/Witsml/Store?wsdl || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 45s
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      # Compose-internal hostnames override .env localhost values.
+      DATABASE_URL: postgresql+asyncpg://witsml:witsml@postgres:5432/witsml
+      REDIS_URL: redis://redis:6379/0
+      WITSML_URL: http://drillflow:7070/Witsml/Store
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      drillflow:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health').status==200 else 1)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 25s
+
+  # Perpetual test rig: creates 20 wells and appends a row to every log @5s.
+  simulator:
+    build:
+      context: .
+      dockerfile: simulator/Dockerfile
+    env_file:
+      - .env
+    environment:
+      WITSML_URL: http://drillflow:7070/Witsml/Store
+    depends_on:
+      drillflow:
+        condition: service_started
+      api:
+        condition: service_started
+    restart: on-failure
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000
+      VITE_WS_BASE_URL: ws://localhost:8000
+    ports:
+      - "5173:5173"
+    depends_on:
+      api:
+        condition: service_started
+
+volumes:
+  pgdata:

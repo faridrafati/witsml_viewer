@@ -1,0 +1,37 @@
+# ── Python ──
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.venv/
+venv/
+.env
+*.db
+*.sqlite3
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+
+# ── Node / frontend ──
+node_modules/
+frontend/dist/
+frontend/.vite/
+*.local
+
+# ── Editors / OS ──
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# ── Docker / runtime ──
+*.log
+pgdata/
+
+# ── Build/orchestration scratch ──
+.workflows/
+
+# Keep example env, ignore real env
+!.env.example
