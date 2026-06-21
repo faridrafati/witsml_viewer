@@ -1,7 +1,13 @@
 # ════════════════════════════════════════════════════════════════════════
 #  WITSML Mudlogging Monitor — full testable stack.
-#  `docker compose up` brings up: postgres, redis, drillflow (WITSML test
-#  server), api (FastAPI BFF), simulator (20-well feed), web (React/Vite).
+#  `docker compose up` brings up: postgres, redis, mockstore (in-house WITSML
+#  1.4.1.1 SOAP test server), api (FastAPI BFF), simulator (20-well feed),
+#  web (React/Vite).
+#
+#  mockstore replaces the previous Drillflow container (which turned out to be
+#  a cloud proxy, not a self-contained store). It speaks the same SOAP 1.1
+#  document/literal WMLS contract the backend's zeep client expects and is
+#  verified end-to-end against app.witsml.client (see mockstore/).
 # ════════════════════════════════════════════════════════════════════════
 name: witsml-mudlogging
 
@@ -32,19 +38,24 @@ services:
       timeout: 3s
       retries: 20
 
-  # WITSML 1.4.1.1 test server (Java/Spring thin facade). Good for protocol
-  # testing. Swap for PDS WITSMLstudio Store for deeper conformance (README).
-  drillflow:
-    image: hashmapinc/drillflow:latest
+  # In-house, self-contained WITSML 1.4.1.1 SOAP store (FastAPI + lxml). The
+  # default test server: an in-memory store that reuses backend/app.witsml.*
+  # constants/parse so it stays faithful to the same contracts the client and
+  # parser enforce. Serves the Store WSDL at /witsml/store?wsdl on :7070.
+  mockstore:
+    build:
+      context: .
+      dockerfile: mockstore/Dockerfile
+    environment:
+      MOCK_STORE_PATH: /witsml/store
     ports:
       - "7070:7070"
     healthcheck:
-      # Drillflow serves the Store WSDL; a 200/non-empty response = up.
-      test: ["CMD-SHELL", "wget -q --spider http://localhost:7070/Witsml/Store?wsdl || exit 1"]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:7070/witsml/store?wsdl >/dev/null || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 18
-      start_period: 45s
+      start_period: 10s
 
   api:
     build:
@@ -56,7 +67,7 @@ services:
       # Compose-internal hostnames override .env localhost values.
       DATABASE_URL: postgresql+asyncpg://witsml:witsml@postgres:5432/witsml
       REDIS_URL: redis://redis:6379/0
-      WITSML_URL: http://drillflow:7070/Witsml/Store
+      WITSML_URL: http://mockstore:7070/witsml/store
     ports:
       - "8000:8000"
     depends_on:
@@ -64,8 +75,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      drillflow:
-        condition: service_started
+      mockstore:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health').status==200 else 1)\""]
       interval: 10s
@@ -81,10 +92,10 @@ services:
     env_file:
       - .env
     environment:
-      WITSML_URL: http://drillflow:7070/Witsml/Store
+      WITSML_URL: http://mockstore:7070/witsml/store
     depends_on:
-      drillflow:
-        condition: service_started
+      mockstore:
+        condition: service_healthy
       api:
         condition: service_started
     restart: on-failure

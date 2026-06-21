@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  WMLS (WITSML Store) 1.4.1.1 — SOAP 1.1 document/literal WSDL for the
+  in-memory mock store. Operation names, message part names, and part order
+  match exactly what app.witsml.client.WitsmlClient invokes.
+
+  Each output message has MULTIPLE parts (Result first, then XMLout/SuppMsgOut
+  etc.). With document/literal zeep returns the parts positionally, which is
+  what the client's _result_triple/_result_pair helpers consume by index. This
+  sidesteps the GetCap CapabilitiesOut-vs-XMLout naming question entirely.
+
+  The single soap:address location is a placeholder; the server rewrites it at
+  serve time to the actual request URL (scheme+host+path).
+-->
+<wsdl:definitions
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:tns="http://www.witsml.org/wsdl/120"
+    targetNamespace="http://www.witsml.org/wsdl/120"
+    name="WMLS">
+
+  <wsdl:types>
+    <xsd:schema
+        elementFormDefault="qualified"
+        targetNamespace="http://www.witsml.org/wsdl/120"
+        xmlns:tns="http://www.witsml.org/wsdl/120">
+
+      <!-- ── WMLS_GetVersion ── -->
+      <xsd:element name="WMLS_GetVersion">
+        <xsd:complexType><xsd:sequence/></xsd:complexType>
+      </xsd:element>
+      <xsd:element name="WMLS_GetVersionResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="Result" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <!-- ── WMLS_GetCap ── -->
+      <xsd:element name="WMLS_GetCap">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="OptionsIn" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <!--
+        Standard WITSML names the capabilities part CapabilitiesOut. The
+        project's client (app.witsml.client.get_cap -> _result_triple) reads
+        the capabilities from the attribute named XMLout / xmlOut only, so we
+        expose BOTH child elements carrying the same string: CapabilitiesOut
+        for standards conformance, XMLout so the unmodified client resolves it.
+        (See the "client bug" note in the mockstore report.)
+      -->
+      <xsd:element name="WMLS_GetCapResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="Result" type="xsd:int"/>
+            <xsd:element name="CapabilitiesOut" type="xsd:string"/>
+            <xsd:element name="XMLout" type="xsd:string" minOccurs="0"/>
+            <xsd:element name="SuppMsgOut" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <!-- ── WMLS_GetFromStore ── -->
+      <xsd:element name="WMLS_GetFromStore">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="WMLtypeIn" type="xsd:string"/>
+            <xsd:element name="QueryIn" type="xsd:string"/>
+            <xsd:element name="OptionsIn" type="xsd:string"/>
+            <xsd:element name="CapabilitiesIn" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="WMLS_GetFromStoreResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="Result" type="xsd:int"/>
+            <xsd:element name="XMLout" type="xsd:string"/>
+            <xsd:element name="SuppMsgOut" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <!-- ── WMLS_AddToStore ── -->
+      <xsd:element name="WMLS_AddToStore">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="WMLtypeIn" type="xsd:string"/>
+            <xsd:element name="XMLin" type="xsd:string"/>
+            <xsd:element name="OptionsIn" type="xsd:string"/>
+            <xsd:element name="CapabilitiesIn" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="WMLS_AddToStoreResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="Result" type="xsd:int"/>
+            <xsd:element name="SuppMsgOut" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <!-- ── WMLS_UpdateInStore ── -->
+      <xsd:element name="WMLS_UpdateInStore">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="WMLtypeIn" type="xsd:string"/>
+            <xsd:element name="XMLin" type="xsd:string"/>
+            <xsd:element name="OptionsIn" type="xsd:string"/>
+            <xsd:element name="CapabilitiesIn" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="WMLS_UpdateInStoreResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="Result" type="xsd:int"/>
+            <xsd:element name="SuppMsgOut" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <!-- ── WMLS_DeleteFromStore ── -->
+      <xsd:element name="WMLS_DeleteFromStore">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="WMLtypeIn" type="xsd:string"/>
+            <xsd:element name="QueryIn" type="xsd:string"/>
+            <xsd:element name="OptionsIn" type="xsd:string"/>
+            <xsd:element name="CapabilitiesIn" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="WMLS_DeleteFromStoreResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="Result" type="xsd:int"/>
+            <xsd:element name="SuppMsgOut" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <!-- ── WMLS_GetBaseMsg ── -->
+      <xsd:element name="WMLS_GetBaseMsg">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="ReturnValueIn" type="xsd:int"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="WMLS_GetBaseMsgResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="Result" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+    </xsd:schema>
+  </wsdl:types>
+
+  <!-- ── Messages (one part each, element-referenced: doc/literal wrapped) ── -->
+  <wsdl:message name="WMLS_GetVersionRequest">
+    <wsdl:part name="parameters" element="tns:WMLS_GetVersion"/>
+  </wsdl:message>
+  <wsdl:message name="WMLS_GetVersionResponse">
+    <wsdl:part name="parameters" element="tns:WMLS_GetVersionResponse"/>
+  </wsdl:message>
+
+  <wsdl:message name="WMLS_GetCapRequest">
+    <wsdl:part name="parameters" element="tns:WMLS_GetCap"/>
+  </wsdl:message>
+  <wsdl:message name="WMLS_GetCapResponse">
+    <wsdl:part name="parameters" element="tns:WMLS_GetCapResponse"/>
+  </wsdl:message>
+
+  <wsdl:message name="WMLS_GetFromStoreRequest">
+    <wsdl:part name="parameters" element="tns:WMLS_GetFromStore"/>
+  </wsdl:message>
+  <wsdl:message name="WMLS_GetFromStoreResponse">
+    <wsdl:part name="parameters" element="tns:WMLS_GetFromStoreResponse"/>
+  </wsdl:message>
+
+  <wsdl:message name="WMLS_AddToStoreRequest">
+    <wsdl:part name="parameters" element="tns:WMLS_AddToStore"/>
+  </wsdl:message>
+  <wsdl:message name="WMLS_AddToStoreResponse">
+    <wsdl:part name="parameters" element="tns:WMLS_AddToStoreResponse"/>
+  </wsdl:message>
+
+  <wsdl:message name="WMLS_UpdateInStoreRequest">
+    <wsdl:part name="parameters" element="tns:WMLS_UpdateInStore"/>
+  </wsdl:message>
+  <wsdl:message name="WMLS_UpdateInStoreResponse">
+    <wsdl:part name="parameters" element="tns:WMLS_UpdateInStoreResponse"/>
+  </wsdl:message>
+
+  <wsdl:message name="WMLS_DeleteFromStoreRequest">
+    <wsdl:part name="parameters" element="tns:WMLS_DeleteFromStore"/>
+  </wsdl:message>
+  <wsdl:message name="WMLS_DeleteFromStoreResponse">
+    <wsdl:part name="parameters" element="tns:WMLS_DeleteFromStoreResponse"/>
+  </wsdl:message>
+
+  <wsdl:message name="WMLS_GetBaseMsgRequest">
+    <wsdl:part name="parameters" element="tns:WMLS_GetBaseMsg"/>
+  </wsdl:message>
+  <wsdl:message name="WMLS_GetBaseMsgResponse">
+    <wsdl:part name="parameters" element="tns:WMLS_GetBaseMsgResponse"/>
+  </wsdl:message>
+
+  <!-- ── Port type ── -->
+  <wsdl:portType name="StoreSoapPort">
+    <wsdl:operation name="WMLS_GetVersion">
+      <wsdl:input message="tns:WMLS_GetVersionRequest"/>
+      <wsdl:output message="tns:WMLS_GetVersionResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="WMLS_GetCap">
+      <wsdl:input message="tns:WMLS_GetCapRequest"/>
+      <wsdl:output message="tns:WMLS_GetCapResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="WMLS_GetFromStore">
+      <wsdl:input message="tns:WMLS_GetFromStoreRequest"/>
+      <wsdl:output message="tns:WMLS_GetFromStoreResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="WMLS_AddToStore">
+      <wsdl:input message="tns:WMLS_AddToStoreRequest"/>
+      <wsdl:output message="tns:WMLS_AddToStoreResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="WMLS_UpdateInStore">
+      <wsdl:input message="tns:WMLS_UpdateInStoreRequest"/>
+      <wsdl:output message="tns:WMLS_UpdateInStoreResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="WMLS_DeleteFromStore">
+      <wsdl:input message="tns:WMLS_DeleteFromStoreRequest"/>
+      <wsdl:output message="tns:WMLS_DeleteFromStoreResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="WMLS_GetBaseMsg">
+      <wsdl:input message="tns:WMLS_GetBaseMsgRequest"/>
+      <wsdl:output message="tns:WMLS_GetBaseMsgResponse"/>
+    </wsdl:operation>
+  </wsdl:portType>
+
+  <!-- ── SOAP 1.1 document/literal binding ── -->
+  <wsdl:binding name="StoreSoapBinding" type="tns:StoreSoapPort">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="WMLS_GetVersion">
+      <soap:operation soapAction="http://www.witsml.org/action/120/Store.WMLS_GetVersion" style="document"/>
+      <wsdl:input><soap:body use="literal"/></wsdl:input>
+      <wsdl:output><soap:body use="literal"/></wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="WMLS_GetCap">
+      <soap:operation soapAction="http://www.witsml.org/action/120/Store.WMLS_GetCap" style="document"/>
+      <wsdl:input><soap:body use="literal"/></wsdl:input>
+      <wsdl:output><soap:body use="literal"/></wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="WMLS_GetFromStore">
+      <soap:operation soapAction="http://www.witsml.org/action/120/Store.WMLS_GetFromStore" style="document"/>
+      <wsdl:input><soap:body use="literal"/></wsdl:input>
+      <wsdl:output><soap:body use="literal"/></wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="WMLS_AddToStore">
+      <soap:operation soapAction="http://www.witsml.org/action/120/Store.WMLS_AddToStore" style="document"/>
+      <wsdl:input><soap:body use="literal"/></wsdl:input>
+      <wsdl:output><soap:body use="literal"/></wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="WMLS_UpdateInStore">
+      <soap:operation soapAction="http://www.witsml.org/action/120/Store.WMLS_UpdateInStore" style="document"/>
+      <wsdl:input><soap:body use="literal"/></wsdl:input>
+      <wsdl:output><soap:body use="literal"/></wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="WMLS_DeleteFromStore">
+      <soap:operation soapAction="http://www.witsml.org/action/120/Store.WMLS_DeleteFromStore" style="document"/>
+      <wsdl:input><soap:body use="literal"/></wsdl:input>
+      <wsdl:output><soap:body use="literal"/></wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="WMLS_GetBaseMsg">
+      <soap:operation soapAction="http://www.witsml.org/action/120/Store.WMLS_GetBaseMsg" style="document"/>
+      <wsdl:input><soap:body use="literal"/></wsdl:input>
+      <wsdl:output><soap:body use="literal"/></wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+
+  <!-- ── Service ── -->
+  <wsdl:service name="WMLS">
+    <wsdl:port name="StoreSoapPort" binding="tns:StoreSoapBinding">
+      <soap:address location="http://localhost:7070/witsml/store"/>
+    </wsdl:port>
+  </wsdl:service>
+
+</wsdl:definitions>

@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     redis_url: str | None = "redis://redis:6379/0"
 
     # ── WITSML server ──
-    witsml_url: str = "http://drillflow:7070/Witsml/Store"
+    witsml_url: str = "http://mockstore:7070/witsml/store"
     witsml_username: str = "witsml"
     witsml_password: str = "witsml"
     witsml_verify_ssl: bool = True

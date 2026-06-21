@@ -23,7 +23,7 @@ docker compose up             # build + start the full stack
 |-------------|-------------------------------------------------------------------|----------------------------------|
 | `postgres`  | Postgres 16 — durable history                                     | `localhost:5432`                 |
 | `redis`     | Redis 7 — warm ring buffer + WebSocket pub/sub                    | `localhost:6379`                 |
-| `drillflow` | Drillflow WITSML 1.4.1.1 test server (SOAP Store)                 | `localhost:7070/Witsml/Store`    |
+| `mockstore` | In-house WITSML 1.4.1.1 SOAP Store test server (FastAPI + lxml)    | `localhost:7070/witsml/store`    |
 | `api`       | FastAPI BFF                                                       | `localhost:8000`                 |
 | `simulator` | Perpetual test rig: creates 20 wells, appends a row to each log @5s | (no port)                      |
 | `web`       | React / Vite frontend                                             | `localhost:5173`                 |

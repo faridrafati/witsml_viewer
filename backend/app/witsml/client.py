@@ -71,6 +71,11 @@ def _result_triple(response: Any) -> tuple[int | None, str | None, str | None]:
     xml_out = getattr(response, "XMLout", None)
     if xml_out is None:
         xml_out = getattr(response, "xmlOut", None)
+    if xml_out is None:
+        # WMLS_GetCap names its output part CapabilitiesOut (not XMLout).
+        xml_out = getattr(response, "CapabilitiesOut", None)
+    if xml_out is None:
+        xml_out = getattr(response, "capabilitiesOut", None)
     supp = getattr(response, "SuppMsgOut", None)
     if supp is None:
         supp = getattr(response, "suppMsgOut", None)
