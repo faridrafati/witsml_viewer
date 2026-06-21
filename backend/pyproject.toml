@@ -15,6 +15,10 @@ dependencies = [
     # ── WITSML SOAP + XML ──
     "zeep>=4.2",
     "httpx>=0.27",
+    # zeep uses `packaging` (optionally) to pick the httpx proxy kwarg for its
+    # AsyncTransport; without it AsyncTransport refuses to construct. zeep does
+    # not hard-require it, so declare it explicitly.
+    "packaging>=23",
     "lxml>=5.2",
     # ── Persistence ──
     "sqlalchemy[asyncio]>=2.0.30",

@@ -12,13 +12,17 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
+# Make the app package importable by the uvicorn console script (cwd is not on
+# sys.path for console entry points).
+ENV PYTHONPATH=/app
 
-# Install deps first for layer caching.
+# Copy the package + project metadata, then install (editable) so `app` is a
+# real importable package AND its dependencies are resolved.
 COPY pyproject.toml ./
-RUN pip install --upgrade pip && pip install .
-
-# App source.
 COPY app ./app
+RUN pip install --upgrade pip && pip install -e .
+
+# Remaining source / config.
 COPY alembic.ini ./alembic.ini
 COPY alembic ./alembic
 COPY tests ./tests

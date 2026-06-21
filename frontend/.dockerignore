@@ -1,0 +1,8 @@
+# Never ship the host's node_modules/dist into the image — the container runs a
+# clean `npm install` for its own (linux) platform; copying host (win32/darwin)
+# native binaries (esbuild, etc.) would break the dev server.
+node_modules
+dist
+.vite
+.env
+.env.local

@@ -1,0 +1,21 @@
+# Keep Docker build contexts small + correct. The mockstore/simulator images
+# use the repo root as context, so excluding these is essential.
+**/.venv
+**/node_modules
+**/__pycache__
+**/*.pyc
+**/*.pyo
+.git
+.gitignore
+.workflows
+.run
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+frontend/dist
+frontend/.vite
+backend/.pytest_cache
+backend/.ruff_cache
+backend/.mypy_cache
+**/.DS_Store
