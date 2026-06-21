@@ -35,6 +35,8 @@ pgdata/
 
 # ── Build/orchestration scratch ──
 .workflows/
+.run/
+witsml_native.db
 
 # Keep example env, ignore real env
 !.env.example

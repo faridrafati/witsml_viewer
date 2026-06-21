@@ -12,9 +12,27 @@ protocol behave like a tidy, live, well-by-well data feed.
 
 ## Quickstart
 
+One command from a fresh checkout — the launcher creates `.env`, then builds
+and starts the whole stack:
+
+```bash
+./run.sh           # macOS / Linux   (Docker)
+run.bat            # Windows         (Docker)
+```
+
+No Docker? Run it natively (Python 3.11+ venv + npm + SQLite, in-process cache):
+
+```bash
+./run.sh native    # or:  run.bat native      (also: ./run.sh down to stop)
+```
+
+The launcher auto-installs the project's dependencies (Docker images, or the
+Python/Node packages); it only asks you to install a missing **runtime**
+(Docker / Python / Node) and prints the link. Equivalent manual steps:
+
 ```bash
 cp .env.example .env          # single source of truth for all settings
-docker compose up             # build + start the full stack
+docker compose up --build     # build + start the full stack
 ```
 
 `docker compose up` brings up six services:
